@@ -1,0 +1,51 @@
+type User @table {
+  displayName: String!
+  email: String!
+  createdAt: Timestamp!
+  photoUrl: String
+  isOrganizer: Boolean
+}
+
+type Event @table {
+  title: String!
+  description: String!
+  date: Date!
+  time: String!
+  location: String!
+  createdAt: Timestamp!
+  imageUrl: String
+  category: String
+  status: String
+  organizer: User
+}
+
+type TicketType @table {
+  name: String!
+  price: Float!
+  quantityAvailable: Int!
+  createdAt: Timestamp!
+  description: String
+  salesStart: Timestamp
+  salesEnd: Timestamp
+  event: Event
+}
+
+type Ticket @table {
+  purchaseDate: Timestamp!
+  ticketCode: String!
+  pricePaid: Float!
+  createdAt: Timestamp!
+  status: String
+  attendee: User
+  event: Event
+  ticketType: TicketType
+}
+
+type Purchase @table {
+  purchaseDate: Timestamp!
+  totalAmount: Float!
+  paymentStatus: String!
+  createdAt: Timestamp!
+  transactionId: String
+  purchaser: User
+}

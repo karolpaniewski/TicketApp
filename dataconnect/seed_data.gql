@@ -1,0 +1,127 @@
+mutation CreateSeedData @transaction @auth(level: USER, insecureReason: "This is a seed data mutation and is safe to be exposed to all logged in users for development purposes.") {
+  user_insertMany(data: [
+    {
+      id: "b4c2b9a1-0b5c-4e8c-8f1a-0e9f8a7b6c5d",
+      displayName: "Alice Smith",
+      email: "alice.smith@example.com",
+      createdAt: "2023-01-01T10:00:00Z",
+      photoUrl: "https://example.com/alice.jpg",
+      isOrganizer: true
+    },
+    {
+      id: "c2d1e0f3-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+      displayName: "Bob Johnson",
+      email: "bob.johnson@example.com",
+      createdAt: "2023-01-02T11:00:00Z",
+      photoUrl: "https://example.com/bob.jpg",
+      isOrganizer: false
+    }
+  ])
+  event_insertMany(data: [
+    {
+      id: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      title: "Annual Tech Conference",
+      description: "A conference for tech enthusiasts and professionals.",
+      date: "2024-10-26",
+      time: "09:00",
+      location: "Convention Center",
+      createdAt: "2023-03-15T14:30:00Z",
+      imageUrl: "https://example.com/tech_conference.jpg",
+      category: "Technology",
+      status: "Active",
+      organizerId: "b4c2b9a1-0b5c-4e8c-8f1a-0e9f8a7b6c5d"
+    },
+    {
+      id: "f7e8d9c0-b1a2-3e4f-5d6c-7b8a9d0c1b2a",
+      title: "Local Music Festival",
+      description: "Enjoy a day of live music from local artists.",
+      date: "2024-08-10",
+      time: "14:00",
+      location: "City Park",
+      createdAt: "2023-04-01T10:00:00Z",
+      imageUrl: "https://example.com/music_festival.jpg",
+      category: "Music",
+      status: "Active",
+      organizerId: "b4c2b9a1-0b5c-4e8c-8f1a-0e9f8a7b6c5d"
+    }
+  ])
+  ticketType_insertMany(data: [
+    {
+      id: "12345678-1234-5678-1234-567812345678",
+      name: "Standard Pass",
+      price: 50.00,
+      quantityAvailable: 200,
+      createdAt: "2023-03-16T09:00:00Z",
+      description: "Grants access to all conference sessions.",
+      salesStart: "2023-03-16T09:00:00Z",
+      salesEnd: "2024-10-25T23:59:59Z",
+      eventId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+    },
+    {
+      id: "87654321-4321-8765-4321-876543210987",
+      name: "VIP Pass",
+      price: 150.00,
+      quantityAvailable: 50,
+      createdAt: "2023-03-16T09:00:00Z",
+      description: "Includes VIP lounge access and meet-and-greet.",
+      salesStart: "2023-03-16T09:00:00Z",
+      salesEnd: "2024-10-25T23:59:59Z",
+      eventId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+    },
+    {
+      id: "abcdef01-2345-6789-abcd-ef0123456789",
+      name: "General Admission",
+      price: 25.00,
+      quantityAvailable: 500,
+      createdAt: "2023-04-02T09:00:00Z",
+      description: "Access to the music festival grounds.",
+      salesStart: "2023-04-02T09:00:00Z",
+      salesEnd: "2024-08-09T23:59:59Z",
+      eventId: "f7e8d9c0-b1a2-3e4f-5d6c-7b8a9d0c1b2a"
+    }
+  ])
+  ticket_insertMany(data: [
+    {
+      id: "d0c1b2a3-e4f5-6d7c-8b9a-0d1c2b3a4f5e",
+      purchaseDate: "2023-05-01T12:00:00Z",
+      ticketCode: "TC2024-001",
+      pricePaid: 50.00,
+      createdAt: "2023-05-01T12:00:00Z",
+      status: "Valid",
+      attendeeId: "c2d1e0f3-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+      eventId: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      ticketTypeId: "12345678-1234-5678-1234-567812345678"
+    },
+    {
+      id: "e4f5a3b2-c1d0-9e8f-7a6b-5c4d3e2f1a0b",
+      purchaseDate: "2023-05-01T12:05:00Z",
+      ticketCode: "MF2024-002",
+      pricePaid: 25.00,
+      createdAt: "2023-05-01T12:05:00Z",
+      status: "Valid",
+      attendeeId: "c2d1e0f3-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+      eventId: "f7e8d9c0-b1a2-3e4f-5d6c-7b8a9d0c1b2a",
+      ticketTypeId: "abcdef01-2345-6789-abcd-ef0123456789"
+    }
+  ])
+  purchase_insertMany(data: [
+    {
+      id: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      purchaseDate: "2023-05-01T12:00:00Z",
+      totalAmount: 50.00,
+      paymentStatus: "Completed",
+      createdAt: "2023-05-01T12:00:00Z",
+      transactionId: "TXN-001",
+      purchaserId: "c2d1e0f3-1a2b-3c4d-5e6f-7a8b9c0d1e2f"
+    },
+    {
+      id: "f1e2d3c4-b5a6-7f8e-9d0c-1b2a3c4d5e6f",
+      purchaseDate: "2023-05-01T12:05:00Z",
+      totalAmount: 25.00,
+      paymentStatus: "Completed",
+      createdAt: "2023-05-01T12:05:00Z",
+      transactionId: "TXN-002",
+      purchaserId: "c2d1e0f3-1a2b-3c4d-5e6f-7a8b9c0d1e2f"
+    }
+  ])
+}

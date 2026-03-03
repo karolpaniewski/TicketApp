@@ -1,0 +1,917 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+:root {
+  --primary: #3b82f6;
+  --bg-dark: #07090e;
+  --card-bg: #111827;
+  --card-border: #1f2937;
+  --text-muted: #94a3b8;
+}
+
+body {
+  background-color: var(--bg-dark); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  margin: 0; padding: 0; overflow-x: hidden;
+}
+
+.app-wrapper {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.container {
+  width: 100%; max-width: 1300px; margin: 0 auto; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
+}
+
+/* WYSZUKIWARKA I FILTRY KATEGORII */
+.search-input {
+  width: 100%; max-width: 700px; padding: 18px 25px; background: var(--card-bg);
+  border: 1px solid var(--card-border); border-radius: 100px; color: white;
+  font-size: 1.1rem; text-align: center; outline: none; transition: 0.3s;
+  box-sizing: border-box; margin-bottom: 25px;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+
+.category-filters { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; width: 100%; }
+.filter-btn {
+  background: var(--card-bg); border: 1px solid var(--card-border); color: #94a3b8;
+  padding: 10px 22px; border-radius: 100px; cursor: pointer; font-weight: 600; font-size: 0.95rem;
+  transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+}
+.filter-btn:hover { border-color: var(--primary); color: white; }
+.filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+
+/* GRID KONCERTÓW */
+.concert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; width: 100%; }
+.concert-card {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+  overflow: hidden; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; text-align: left; position: relative;
+}
+.concert-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.concert-image { width: 100%; height: 220px; object-fit: cover; transition: transform 0.5s; }
+.concert-card:hover .concert-image { transform: scale(1.05); }
+
+.category-badge {
+  position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px);
+  color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; border: 1px solid rgba(255, 255, 255, 0.1); z-index: 10;
+}
+
+.concert-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; position: relative; z-index: 2; background: var(--card-bg); }
+.concert-meta { color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; }
+.concert-info h3 { margin: 0 0 15px 0; font-size: 1.4rem; }
+.price-tag { color: var(--primary); font-weight: 800; font-size: 1.2rem; margin-top: auto; }
+
+/* REZERWACJA SALA */
+.reservation-container { width: 100%; }
+.event-hero {
+  width: 100%; height: 400px; border-radius: 24px; background-size: cover; background-position: center;
+  position: relative; display: flex; align-items: flex-end; padding: 40px; margin-bottom: 30px; box-sizing: border-box;
+}
+.event-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-dark), transparent); border-radius: 24px; }
+.hero-text { position: relative; z-index: 2; text-align: left; }
+.booking-layout { display: grid; grid-template-columns: 1fr 380px; gap: 40px; width: 100%; align-items: start; }
+@media (max-width: 1000px) { .booking-layout { grid-template-columns: 1fr; } }
+.seating-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 40px; width: 100%; box-sizing: border-box; }
+.stage-container { margin-bottom: 50px; text-align: center; }
+.stage-line { width: 70%; height: 4px; background: linear-gradient(to right, transparent, var(--primary), transparent); margin: 10px auto; box-shadow: 0 10px 20px rgba(59,130,246,0.5); }
+.rzad-container { display: flex; align-items: center; margin-bottom: 25px; width: 100%; }
+.rzad-label { width: 120px; text-align: left; color: #94a3b8; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+.seats-row { flex: 1; display: flex; justify-content: center; gap: 10px; }
+
+/* --- NOWOŚĆ: KLASY DLA KRZESEŁEK --- */
+.seat-btn { width: 42px; height: 42px; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; font-size: 0.9rem; transition: 0.2s; }
+.seat-btn.available { background: #1f2937; color: #fff; }
+.seat-btn.available:hover { background: #374151; transform: scale(1.1); }
+.seat-btn.selected { background: var(--primary); color: white; transform: scale(1.1); box-shadow: 0 0 15px var(--primary); }
+.seat-btn.occupied { background: #000; color: #374151; cursor: not-allowed; opacity: 0.5; }
+
+/* Blokowanie na żywo (pomarańczowy, pulsujący kolor) */
+.seat-btn.locked { 
+  background: #f97316; color: white; cursor: not-allowed; 
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); animation: pulse 1.5s infinite; 
+}
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+/* Plan hali 5k – kompaktowe miejsce, układ jak arena */
+.hall-plan .seat-btn { width: 22px; height: 22px; border-radius: 4px; font-size: 0.6rem; padding: 0; }
+.hall-plan .seats-row { gap: 4px; }
+.hall-plan .rzad-container { margin-bottom: 12px; }
+.hall-plan .rzad-label { width: 140px; font-size: 0.75rem; }
+.hall-plan-section {
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--card-border);
+}
+.hall-plan-section-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+}
+.hall-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.hall-layout-grid .hall-center { grid-column: 2; }
+.hall-layout-grid .hall-left { grid-column: 1; }
+.hall-layout-grid .hall-right { grid-column: 3; }
+.hall-layout-grid .hall-bottom { grid-column: 1 / -1; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+/* BILET I LOGOWANIE */
+.ticket-sidebar { position: sticky; top: 40px; width: 100%; }
+.digital-ticket { background: #fff; color: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.5); width: 100%; }
+.ticket-main { padding: 30px; border-bottom: 2px dashed #e2e8f0; text-align: left; }
+.ticket-footer { padding: 25px; background: #f8fafc; }
+.btn-buy { width: 100%; padding: 18px; background: linear-gradient(to right, var(--primary), #8b5cf6); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; }
+.btn-buy:disabled { filter: grayscale(1); opacity: 0.4; cursor: not-allowed; }
+/* Pola formularza (admin, kreator sal) */
+.auth-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+.auth-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+.auth-input::placeholder {
+  color: #64748b;
+}
+.auth-input[type="number"]::-webkit-inner-spin-button,
+.auth-input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+select.auth-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='%2394a3b8'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+input[type="date"].auth-input {
+  cursor: pointer;
+}
+input[type="color"].auth-input {
+  padding: 4px;
+  height: 44px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.admin-color-section {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+.admin-color-section .pt-label {
+  margin-bottom: 10px;
+}
+.admin-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+.admin-tabs .page-btn {
+  flex: 1;
+  min-width: 180px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+.admin-tabs .page-btn:hover {
+  border-color: var(--primary);
+}
+.admin-form-card h2,
+.seating-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.admin-concert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  transition: border-color 0.3s;
+}
+.admin-concert-item:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.admin-concert-item strong {
+  font-size: 1.1rem;
+}
+.admin-concert-meta {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+.admin-form-row {
+  display: flex;
+  gap: 10px;
+}
+.admin-form-row .auth-input {
+  margin-bottom: 0;
+}
+
+.auth-view-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 60vh;
+}
+.auth-card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 50px; border-radius: 24px; width: 100%; max-width: 450px; text-align: center; margin-top: 10vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+.main-title { font-size: 3rem; font-weight: 800; margin-bottom: 10px; text-align: center; }
+.page-btn, .logout-btn { background: rgba(255,255,255,0.1); border: none; padding: 10px 20px; border-radius: 10px; color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
+.page-btn:hover:not(:disabled), .logout-btn:hover { background: var(--primary); }
+.fade-in { width: 100%; animation: fadeIn 0.4s ease-out; }
+
+/* SLIDER KONCERTÓW */
+.slider-container { width: 100%; height: 450px; position: relative; border-radius: 24px; overflow: hidden; margin-bottom: 60px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); background-color: #111827; }
+.slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 50px; }
+.slide.active { opacity: 1; z-index: 1; }
+.slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(7, 9, 14, 1) 5%, rgba(7, 9, 14, 0.4) 50%, transparent 100%); }
+.slide-content { position: relative; z-index: 2; text-align: left; }
+.slide-title { font-size: clamp(3rem, 5vw, 4.5rem); font-weight: 800; margin: 0 0 10px 0; text-shadow: 2px 2px 20px rgba(0,0,0,0.8); }
+.slide-btn { background: linear-gradient(to right, var(--primary), #8b5cf6); color: white; border: none; padding: 16px 35px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.slide-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
+.slider-dots { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
+.dot.active { background: var(--primary); transform: scale(1.3); }
+
+/* =========================================
+   SZABLON BILETU PDF (FAN TICKET STYLE)
+   ========================================= */
+
+/* Ukrywamy szablon przed okiem użytkownika - używany tylko do renderowania PDF */
+.ticket-print-wrapper {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  z-index: -999;
+}
+
+/* Wymiary i tło główne (proporcje biletu fizycznego) */
+.fan-ticket {
+  width: 1000px;
+  height: 350px;
+  background-color: #fbcfe8; /* Jasny róż z Eventimu */
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  color: #000;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Duży napis WZÓR w tle (jako znak wodny) */
+.fan-ticket-watermark {
+  position: absolute;
+  left: 250px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 150px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Zdjęcie artysty w prawej części */
+.fan-ticket-bg {
+  position: absolute;
+  right: 120px; /* Zostawiamy miejsce na odrywany kupon */
+  top: 0;
+  width: 60%;
+  height: 100%;
+  background-size: cover;
+  background-position: top center;
+  z-index: 1;
+}
+
+/* Płynne przejście między różowym tłem a zdjęciem artysty */
+.fan-ticket-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, #fbcfe8 0%, rgba(251, 207, 232, 0.6) 30%, transparent 100%);
+}
+
+/* Lewa kolumna (Dane wydarzenia) */
+.fan-ticket-left {
+  width: 320px;
+  padding: 30px 20px 30px 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+/* Pionowy kod z lewej krawędzi */
+.fan-barcode-container {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Środkowa kolumna (Tytuł wielkim drukiem) */
+.fan-ticket-middle {
+  flex: 1;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.fan-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #111827;
+  text-shadow: 2px 2px 10px rgba(255,255,255,0.8);
+}
+
+/* Prawa kolumna (Odrywany kupon z kodem QR) */
+.fan-ticket-right {
+  width: 140px;
+  border-left: 2px dashed #000;
+  background-color: #fbcfe8;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.fan-ticket-right-text {
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #000;
+  margin-top: 50px;
+}
+/* =========================================
+   NOWY WYGLĄD: E-TICKET PASSPORT (PROFIL)
+   ========================================= */
+   .passport-ticket {
+    display: flex;
+    width: 100%;
+    min-height: 240px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    position: relative;
+    margin-bottom: 30px;
+    color: #0f172a;
+    transition: transform 0.3s;
+  }
+  .passport-ticket:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+  
+  /* Przenikające zdjęcie artysty po prawej stronie */
+  .pt-bg {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 65%;
+    background-size: cover;
+    background-position: top center;
+    z-index: 1;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%);
+    mask-image: linear-gradient(to right, transparent 0%, black 40%);
+  }
+  
+  .pt-content {
+    position: relative;
+    z-index: 2;
+    padding: 30px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .pt-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 60%;
+  }
+  
+  .pt-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    z-index: 3;
+  }
+  
+  /* Pojemnik na wygenerowany kod QR */
+  .pt-qr-box {
+    background: #fff;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+  
+  .pt-label { 
+    color: #475569; 
+    font-size: 0.75rem; 
+    font-weight: 800; 
+    letter-spacing: 1px; 
+    margin-bottom: 4px; 
+    display: block; 
+  }
+  .pt-value { 
+    font-size: 1.1rem; 
+    font-weight: 900; 
+    margin-bottom: 15px; 
+  }
+  
+  @media(max-width: 768px) {
+    .passport-ticket { flex-direction: column; }
+    .pt-bg { width: 100%; height: 150px; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 50%); mask-image: linear-gradient(to bottom, transparent 0%, black 50%); }
+    .pt-content { flex-direction: column; gap: 20px; }
+    .pt-info { max-width: 100%; }
+    .pt-right { align-items: flex-start; flex-direction: row; width: 100%; }
+  }
+
+/* =========================================
+   HEADER
+   ========================================= */
+.site-header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--card-border);
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.header-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 72px;
+  flex-wrap: wrap;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 8px 0;
+}
+.header-logo:hover { opacity: 0.9; }
+.header-logo-icon { font-size: 1.8rem; }
+.header-logo-text { background: linear-gradient(to right, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.header-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.header-nav a:hover { color: white; }
+.header-badge {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-weight: 800;
+}
+
+.header-auth { display: flex; align-items: center; }
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+}
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.header-user-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.header-user-email { font-size: 0.9rem; font-weight: 700; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.header-btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.header-btn-primary {
+  background: linear-gradient(to right, var(--primary), #8b5cf6);
+  color: white;
+}
+.header-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
+.header-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid var(--card-border);
+}
+.header-btn-secondary:hover { background: var(--primary); border-color: var(--primary); }
+.header-btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+}
+.header-btn-outline:hover { color: white; border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+
+@media (max-width: 768px) {
+  .header-inner { padding: 16px 0; }
+  .header-nav { display: none; }
+  .header-user-info { display: none; }
+}
+
+/* =========================================
+   FOOTER
+   ========================================= */
+.site-footer {
+  background: var(--card-bg);
+  border-top: 1px solid var(--card-border);
+  margin-top: auto;
+  padding: 60px 24px 30px;
+}
+
+.footer-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(4, 1fr);
+  gap: 40px;
+  margin-bottom: 50px;
+}
+@media (max-width: 1000px) {
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+.footer-brand { max-width: 280px; }
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: white;
+}
+.footer-logo-icon { font-size: 1.6rem; }
+.footer-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footer-title {
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-links li { margin-bottom: 10px; }
+.footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--primary); }
+
+.footer-newsletter p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 16px 0;
+  max-width: 220px;
+}
+.footer-newsletter-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.footer-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.footer-input:focus { border-color: var(--primary); }
+.footer-input::placeholder { color: #64748b; }
+.footer-btn {
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.footer-btn:hover { background: #2563eb; transform: translateY(-1px); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid var(--card-border);
+}
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+.footer-social-link {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.footer-social-link:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+.footer-copyright {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Plan sali - edytor wizualny */
+.plan-editor {
+  width: 100%;
+  padding: 20px 0;
+}
+.plan-editor-toolbar {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid var(--card-border);
+}
+.plan-editor-selection {
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.plan-editor-canvas-wrap canvas {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Admin Dashboard */
+.admin-dashboard-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+.admin-dashboard h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: white;
+}
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.dashboard-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dashboard-card-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.dashboard-card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+}
+.dashboard-events-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.dashboard-events-header {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1.2fr 1fr;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.dashboard-events-row {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 0.8fr 1.2fr 1fr;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  font-size: 0.95rem;
+}
+.dashboard-events-row:last-child { border-bottom: none; }
+.dashboard-fill-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dashboard-fill-bar {
+  display: inline-block;
+  width: 80px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.dashboard-fill-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+.dashboard-fill-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 36px;
+}
+.dashboard-orders { display: flex; flex-direction: column; gap: 8px; }
+.dashboard-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.dashboard-order-meta { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
+.dashboard-order-right { text-align: right; }
+.dashboard-order-cost { font-weight: 800; color: #10b981; margin-right: 8px; }
+@media (max-width: 900px) {
+  .dashboard-events-header, .dashboard-events-row {
+    grid-template-columns: 1.5fr 0.6fr 0.6fr 0.8fr 0.8fr;
+    font-size: 0.85rem;
+  }
+}
+
+/* Admin - Zarządzanie administratorami */
+.admin-admins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-admin-row span { font-weight: 600; }
+.admin-admins-add {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.admin-admins-add input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+}
+.admin-admins-add input::placeholder { color: #64748b; }
+.admin-admins-add input:focus { outline: none; border-color: var(--primary); }
