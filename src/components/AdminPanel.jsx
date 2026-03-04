@@ -3,8 +3,9 @@ import { db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 import PlanSaliEditor from './PlanSaliEditor';
 import AdminDashboard from './AdminDashboard';
+import TicketEditor from './TicketEditor';
 
-export default function AdminPanel({ koncerty, refreshData, planySali, refreshPlany, onBackToSite }) {
+export default function AdminPanel({ koncerty, refreshData, planySali, refreshPlany, onBackToSite, isAdmin }) {
   const [tab, setTab] = useState('dashboard'); 
   const kategorie = ["🎵 Muzyka", "🎭 Teatr", "🎤 Stand-up", "🏟️ Sport", "🎪 Inne"];
 
@@ -23,6 +24,9 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
   const [adminEmails, setAdminEmails] = useState([]);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [loadingAdmins, setLoadingAdmins] = useState(true);
+  const [promotorEmails, setPromotorEmails] = useState([]);
+  const [newPromotorEmail, setNewPromotorEmail] = useState('');
+  const [loadingPromotors, setLoadingPromotors] = useState(true);
 
   const loadAdminEmails = async () => {
     try {
@@ -38,8 +42,23 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
     setLoadingAdmins(false);
   };
 
+  const loadPromotorEmails = async () => {
+    try {
+      const snap = await getDoc(doc(db, 'config', 'promotors'));
+      if (snap.exists() && Array.isArray(snap.data().emails)) {
+        setPromotorEmails(snap.data().emails);
+      } else {
+        setPromotorEmails([]);
+      }
+    } catch (e) { console.error(e); }
+    setLoadingPromotors(false);
+  };
+
   useEffect(() => {
-    if (tab === 'admins') loadAdminEmails();
+    if (tab === 'admins') {
+      loadAdminEmails();
+      loadPromotorEmails();
+    }
   }, [tab]);
 
   const addAdmin = async () => {
@@ -67,6 +86,31 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
     try {
       await setDoc(doc(db, 'config', 'admins'), { emails: next });
       setAdminEmails(next);
+      alert('✅ Usunięto.');
+    } catch (e) { console.error(e); alert('Błąd.'); }
+  };
+
+  const addPromotor = async () => {
+    const email = newPromotorEmail.trim().toLowerCase();
+    if (!email) return;
+    if (promotorEmails.includes(email)) {
+      alert('Ten adres jest już na liście promotorów.');
+      return;
+    }
+    try {
+      await setDoc(doc(db, 'config', 'promotors'), { emails: [...promotorEmails, email] }, { merge: true });
+      setPromotorEmails([...promotorEmails, email]);
+      setNewPromotorEmail('');
+      alert('✅ Promotor dodany.');
+    } catch (e) { console.error(e); alert('Błąd zapisu.'); }
+  };
+
+  const removePromotor = async (email) => {
+    if (!window.confirm(`Usunąć promotora: ${email}?`)) return;
+    const next = promotorEmails.filter(e => e !== email);
+    try {
+      await setDoc(doc(db, 'config', 'promotors'), { emails: next });
+      setPromotorEmails(next);
       alert('✅ Usunięto.');
     } catch (e) { console.error(e); alert('Błąd.'); }
   };
@@ -196,10 +240,12 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
         <button className="page-btn" onClick={() => setTab('dashboard')} style={{ background: tab === 'dashboard' ? 'var(--primary)' : 'rgba(255,255,255,0.08)', borderColor: tab === 'dashboard' ? 'var(--primary)' : undefined }}>📊 Dashboard</button>
         <button className="page-btn" onClick={() => setTab('koncerty')} style={{ background: tab === 'koncerty' ? 'var(--primary)' : 'rgba(255,255,255,0.08)', borderColor: tab === 'koncerty' ? 'var(--primary)' : undefined }}>🎤 Zarządzaj Wydarzeniami</button>
         <button className="page-btn" onClick={() => setTab('kreator')} style={{ background: tab === 'kreator' ? '#8b5cf6' : 'rgba(255,255,255,0.08)', borderColor: tab === 'kreator' ? '#8b5cf6' : undefined }}>🪑 Kreator Planów Sali</button>
-        <button className="page-btn" onClick={() => setTab('admins')} style={{ background: tab === 'admins' ? '#10b981' : 'rgba(255,255,255,0.08)', borderColor: tab === 'admins' ? '#10b981' : undefined }}>👥 Administratorzy</button>
+        {isAdmin && (
+          <button className="page-btn" onClick={() => setTab('admins')} style={{ background: tab === 'admins' ? '#10b981' : 'rgba(255,255,255,0.08)', borderColor: tab === 'admins' ? '#10b981' : undefined }}>👥 Administratorzy</button>
+        )}
       </div>
 
-      {tab === 'dashboard' ? (
+      {(tab === 'dashboard' || (tab === 'admins' && !isAdmin)) ? (
         <AdminDashboard koncerty={koncerty} planySali={planySali} />
       ) : tab === 'admins' ? (
         <div className="seating-card">
@@ -219,6 +265,33 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
                   <button className="logout-btn" onClick={() => removeAdmin(email)} style={{ padding: '6px 12px' }} disabled={adminEmails.length <= 1}>Usuń</button>
                 </div>
               ))}
+            </div>
+          )}
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--card-border)', margin: '30px 0' }} />
+
+          <h3 style={{ marginBottom: '12px', fontSize: '1.1rem' }}>📢 Promotorzy</h3>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '16px', fontSize: '0.9rem' }}>
+            Promotorzy mają dostęp do wydarzeń, dashboardu i kreatora sal – bez zarządzania administratorami.
+          </p>
+          <div className="admin-admins-add">
+            <input type="email" placeholder="np. promotor@example.com" value={newPromotorEmail} onChange={e => setNewPromotorEmail(e.target.value)} />
+            <button className="btn-buy" onClick={addPromotor} style={{ background: '#f59e0b' }}>Dodaj promotora</button>
+          </div>
+          {loadingPromotors ? <p style={{ color: 'var(--text-muted)' }}>Ładowanie…</p> : (
+            <div className="admin-admins-list">
+              {promotorEmails.filter(e => !adminEmails.includes(e)).map(email => (
+                <div key={email} className="admin-admin-row">
+                  <span>{email} <small style={{ color: 'var(--text-muted)', marginLeft: 8 }}>promotor</small></span>
+                  <button className="logout-btn" onClick={() => removePromotor(email)} style={{ padding: '6px 12px' }}>Usuń</button>
+                </div>
+              ))}
+              {promotorEmails.filter(e => adminEmails.includes(e)).length > 0 && (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 10 }}>
+                  Administratorzy mają automatycznie uprawnienia promotora.
+                </p>
+              )}
+              {promotorEmails.length === 0 && <p style={{ color: 'var(--text-muted)', margin: 0 }}>Brak promotorów.</p>}
             </div>
           )}
         </div>
@@ -244,12 +317,13 @@ export default function AdminPanel({ koncerty, refreshData, planySali, refreshPl
                   <input type="date" className="auth-input" value={form.data} onChange={e => setForm({...form, data: e.target.value})} required style={{flex: 1}} />
                 </div>
 
-                <div className="admin-color-section">
-                  <label className="pt-label">Personalizacja Biletu</label>
-                  <input type="url" className="auth-input" placeholder="URL zdjęcia tła biletu (opcjonalnie)" value={form.ticketBg} onChange={e => setForm({...form, ticketBg: e.target.value})} style={{ marginBottom: '12px' }} />
-                  <label className="pt-label">Kolor Passport</label>
-                  <input type="color" className="auth-input" value={form.ticketColor} onChange={e => setForm({...form, ticketColor: e.target.value})} />
-                </div>
+                <TicketEditor
+                  ticketBg={form.ticketBg}
+                  ticketColor={form.ticketColor}
+                  artysta={form.artysta}
+                  placeholderArtysta="Nazwa wydarzenia"
+                  onChange={updates => setForm(f => ({ ...f, ...updates }))}
+                />
 
                 <button type="submit" className="btn-buy">{editingId ? "Zapisz zmiany" : "Opublikuj Wydarzenie"}</button>
                 {editingId && <button type="button" className="logout-btn" onClick={() => {setEditingId(null); setForm({artysta:'', cenaBazowa:'', data:'', image:'', isPromoted:false, planSali:'arena', kategoria:'🎵 Muzyka', ticketBg:'', ticketColor:'#fbcfe8'})}}>Anuluj edycję</button>}

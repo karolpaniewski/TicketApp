@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function ReservationView({ wybranyKoncert, user, userEmail, onRequireAuth, setWybranyKoncert, wybraneMiejsca, toggleMiejsce, autoSelectSeat, kupBilety, wszystkieMiejsca, nazwaSali, timeLeft, odblokujMiejsca }) {
+export default function ReservationView({ wybranyKoncert, user, userEmail, onRequireAuth, setWybranyKoncert, wybraneMiejsca, toggleMiejsce, autoSelectSeat, kupBilety, wszystkieMiejsca, nazwaSali, timeLeft, odblokujMiejsca, koncerty, obserwowaneIds, toggleObserwowane }) {
   const [trybZakupu, setTrybZakupu] = useState('plan'); // 'plan' | 'auto'
 
   const zajete = wybranyKoncert?.zajeteMiejsca || [];
@@ -61,17 +61,62 @@ export default function ReservationView({ wybranyKoncert, user, userEmail, onReq
     setWybranyKoncert(null);
   };
 
+  const normalizeArtist = (name) => {
+    if (!name) return '';
+    const przed = String(name).split(/\s*[-–(]\s*/)[0].trim().toLowerCase();
+    return przed || String(name).trim().toLowerCase();
+  };
+  const glownyArtysta = normalizeArtist(wybranyKoncert?.artysta);
+  const inneWydarzeniaArtysty = (koncerty || []).filter(k =>
+    k.id_db !== wybranyKoncert?.id_db && (normalizeArtist(k.artysta) === glownyArtysta || String(k.artysta || '').toLowerCase().startsWith(glownyArtysta) || glownyArtysta.startsWith(normalizeArtist(k.artysta)))
+  );
+
   return (
     <div className="reservation-container">
       <div className="event-hero" style={{ backgroundImage: `url(${wybranyKoncert.image || 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=1200'})` }}>
         <div className="hero-text">
-          <button className="page-btn" style={{marginBottom: '20px'}} onClick={handleBackClick}>← Wróć do listy</button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '20px' }}>
+            <button className="page-btn" onClick={handleBackClick}>← Wróć do listy</button>
+            {user && (
+              <button
+                className={`page-btn ${obserwowaneIds?.includes(wybranyKoncert.id_db) ? 'observe-active' : ''}`}
+                onClick={() => toggleObserwowane?.(wybranyKoncert.id_db)}
+                title={obserwowaneIds?.includes(wybranyKoncert.id_db) ? 'Usuń z obserwowanych' : 'Dodaj do obserwowanych'}
+                style={{ background: obserwowaneIds?.includes(wybranyKoncert.id_db) ? 'rgba(234, 179, 8, 0.4)' : 'rgba(255,255,255,0.1)' }}
+              >
+                {obserwowaneIds?.includes(wybranyKoncert.id_db) ? '★ W obserwowanych' : '☆ Obserwuj'}
+              </button>
+            )}
+          </div>
           <div style={{background: 'rgba(255, 193, 7, 0.2)', color: '#ffc107', padding: '5px 15px', borderRadius: '20px', display: 'inline-block', fontWeight: 'bold'}}>
             ⏳ Pozostały czas: {formatTime(timeLeft)}
           </div>
           <h1 style={{fontSize: '3.5rem', margin: '15px 0', textShadow: '2px 2px 10px rgba(0,0,0,0.8)'}}>{wybranyKoncert.artysta}</h1>
           <p>{nazwaSali} | {wybranyKoncert.data}</p>
         </div>
+      </div>
+
+      <div className="inne-wydarzenia-artysty">
+        <h3>🎤 Inne wydarzenia: {wybranyKoncert?.artysta}</h3>
+        {inneWydarzeniaArtysty.length > 0 ? (
+          <div className="inne-wydarzenia-grid">
+            {inneWydarzeniaArtysty.map(k => (
+              <button
+                key={k.id_db}
+                className="inne-wydarzenie-card"
+                onClick={() => { odblokujMiejsca(); setWybranyKoncert(k); }}
+              >
+                <img src={k.image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=400'} alt={k.artysta} />
+                <div>
+                  <strong>{k.artysta}</strong>
+                  <span>📅 {k.data} · {k.cenaBazowa} PLN</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>Brak innych wydarzeń tego artysty w ofercie.</p>
+        )}
       </div>
 
       <div className="booking-layout">

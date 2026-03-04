@@ -66,10 +66,35 @@ body {
   color: white; padding: 6px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; border: 1px solid rgba(255, 255, 255, 0.1); z-index: 10;
 }
 
+.concert-observe-btn {
+  position: absolute; top: 15px; left: 15px; width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); color: #94a3b8;
+  font-size: 1.2rem; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.concert-observe-btn:hover { background: rgba(234, 179, 8, 0.3); color: #fbbf24; border-color: #fbbf24; }
+.concert-observe-btn.active { background: rgba(234, 179, 8, 0.4); color: #fbbf24; border-color: #fbbf24; }
+
 .concert-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; position: relative; z-index: 2; background: var(--card-bg); }
 .concert-meta { color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; }
 .concert-info h3 { margin: 0 0 15px 0; font-size: 1.4rem; }
 .price-tag { color: var(--primary); font-weight: 800; font-size: 1.2rem; margin-top: auto; }
+
+/* Inne wydarzenia tego artysty */
+.inne-wydarzenia-artysty {
+  width: 100%; margin-bottom: 30px; padding: 24px; background: rgba(0,0,0,0.15); border-radius: 16px; border: 1px solid var(--card-border);
+}
+.inne-wydarzenia-artysty h3 { margin: 0 0 20px 0; font-size: 1.2rem; color: white; }
+.inne-wydarzenia-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+.inne-wydarzenie-card {
+  display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: left; min-width: 200px; flex: 1;
+}
+.inne-wydarzenie-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.inne-wydarzenie-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+.inne-wydarzenie-card > div { display: flex; flex-direction: column; gap: 4px; }
+.inne-wydarzenie-card strong { font-size: 1rem; }
+.inne-wydarzenie-card span { font-size: 0.85rem; color: var(--text-muted); }
 
 /* REZERWACJA SALA */
 .reservation-container { width: 100%; }
@@ -193,6 +218,138 @@ input[type="color"].auth-input {
 .admin-color-section .pt-label {
   margin-bottom: 10px;
 }
+
+/* Wizualny edytor biletu */
+.ticket-editor {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+}
+.ticket-editor-title {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: white;
+}
+.ticket-editor-desc {
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.ticket-editor-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .ticket-editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.ticket-editor-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ticket-editor-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ticket-editor-field input[type="url"],
+.ticket-editor-field input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+}
+.ticket-editor-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.ticket-editor-color-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.ticket-editor-color-input {
+  width: 50px;
+  height: 44px;
+  padding: 4px;
+  border: 2px solid var(--card-border);
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+}
+.ticket-editor-color-hex {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  color: white;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.ticket-editor-presets {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ticket-editor-presets span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-right: 4px;
+}
+.ticket-editor-preset {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.ticket-editor-preset:hover {
+  transform: scale(1.1);
+}
+.ticket-editor-preset.active {
+  border-color: white;
+  box-shadow: 0 0 0 2px var(--primary);
+}
+.ticket-editor-preview {
+  position: relative;
+}
+.ticket-editor-preview-label {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.ticket-editor-preview-ticket {
+  min-height: 200px;
+  pointer-events: none;
+}
+.ticket-editor-preview-ticket .pt-artysta-preview {
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  margin: 0 0 20px 0;
+}
+
 .admin-tabs {
   display: flex;
   gap: 15px;
@@ -269,9 +426,95 @@ input[type="color"].auth-input {
 .slide-title { font-size: clamp(3rem, 5vw, 4.5rem); font-weight: 800; margin: 0 0 10px 0; text-shadow: 2px 2px 20px rgba(0,0,0,0.8); }
 .slide-btn { background: linear-gradient(to right, var(--primary), #8b5cf6); color: white; border: none; padding: 16px 35px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
 .slide-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
+.slide-observe-btn {
+  position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.3); color: #94a3b8;
+  font-size: 1.4rem; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.slide-observe-btn:hover { background: rgba(234, 179, 8, 0.3); color: #fbbf24; }
+.slide-observe-btn.active { background: rgba(234, 179, 8, 0.5); color: #fbbf24; }
 .slider-dots { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
 .dot.active { background: var(--primary); transform: scale(1.3); }
+
+/* Hot Events - Najgorętsze wydarzenia */
+.hot-events {
+  width: 100%;
+  margin-bottom: 50px;
+}
+.hot-events-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 8px 0;
+}
+.hot-events-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0 0 24px 0;
+}
+.hot-events-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start;
+}
+.hot-event-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: left;
+  min-width: 280px;
+  flex: 1;
+  max-width: 360px;
+}
+.hot-event-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+.hot-event-rank {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  min-width: 40px;
+  text-align: center;
+}
+.hot-event-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.hot-event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.hot-event-info strong {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hot-event-info span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.hot-event-price {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+}
 
 /* =========================================
    SZABLON BILETU PDF (FAN TICKET STYLE)
@@ -543,6 +786,9 @@ input[type="color"].auth-input {
   padding: 4px 10px;
   border-radius: 100px;
   font-weight: 800;
+}
+.header-badge-promotor {
+  background: linear-gradient(to right, #f59e0b, #d97706);
 }
 
 .header-auth { display: flex; align-items: center; }

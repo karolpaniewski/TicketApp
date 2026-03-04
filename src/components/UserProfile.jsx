@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
 import OrderHistory from './OrderHistory';
 
-export default function UserProfile({ user, historia, onClose }) {
+export default function UserProfile({ user, historia, onClose, koncerty, obserwowaneIds, toggleObserwowane, onSelectConcert }) {
   const [isGenerating, setIsGenerating] = useState(null);
 
   const dataDolaczenia = user?.metadata?.creationTime 
@@ -28,6 +28,8 @@ export default function UserProfile({ user, historia, onClose }) {
     setIsGenerating(null);
   };
 
+  const obserwowaneKoncerty = (koncerty || []).filter(k => (obserwowaneIds || []).includes(k.id_db));
+
   return (
     <div className="fade-in" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       
@@ -35,6 +37,31 @@ export default function UserProfile({ user, historia, onClose }) {
         <h1 className="main-title" style={{ margin: 0 }}>Mój Profil</h1>
         <button className="page-btn" onClick={onClose}>← Wróć do wydarzeń</button>
       </div>
+
+      {obserwowaneKoncerty.length > 0 && (
+        <div style={{ width: '100%', marginBottom: '40px' }}>
+          <h2 style={{ fontSize: '1.5rem', borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '15px', marginBottom: '20px' }}>
+            ⭐ Obserwowane wydarzenia ({obserwowaneKoncerty.length})
+          </h2>
+          <div className="concert-grid">
+            {obserwowaneKoncerty.map(k => (
+              <div key={k.id_db} className="concert-card" onClick={() => onSelectConcert?.(k)}>
+                <button
+                  className="concert-observe-btn active"
+                  onClick={(e) => { e.stopPropagation(); toggleObserwowane?.(k.id_db); }}
+                  title="Usuń z obserwowanych"
+                >★</button>
+                <img src={k.image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800'} alt={k.artysta} className="concert-image" />
+                <div className="concert-info">
+                  <div className="concert-meta">📅 {k.data}</div>
+                  <h3>{k.artysta}</h3>
+                  <div className="price-tag">{k.cenaBazowa} PLN</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div style={{ width: '100%', textAlign: 'left', marginBottom: '20px' }}>
         <h2 style={{ fontSize: '2rem', borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '15px' }}>

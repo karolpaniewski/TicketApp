@@ -10,6 +10,7 @@ import AuthView from './components/AuthView';
 import AdminPanel from './components/AdminPanel';
 import UserProfile from './components/UserProfile';
 import ConcertSlider from './components/ConcertSlider';
+import HotEvents from './components/HotEvents';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -73,11 +74,13 @@ export default function App() {
   
   const [historiaZamowien, setHistoriaZamowien] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
+  const [obserwowaneIds, setObserwowaneIds] = useState([]);
   
   const [timeLeft, setTimeLeft] = useState(300);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [adminEmails, setAdminEmails] = useState(['admin@ticket.pl']);
+  const [promotorEmails, setPromotorEmails] = useState([]);
   const itemsPerPage = 8;
 
   const kategorieZMenu = ["Wszystkie", ...DOSTEPNE_KATEGORIE];
@@ -101,6 +104,30 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
+  const fetchObserwowane = async (uid) => {
+    if (!uid) return;
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      if (snap.exists() && Array.isArray(snap.data().obserwowaneIds)) {
+        setObserwowaneIds(snap.data().obserwowaneIds);
+      } else {
+        setObserwowaneIds([]);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const toggleObserwowane = async (koncertId) => {
+    if (!user) return;
+    const uid = user.uid;
+    let next = obserwowaneIds.includes(koncertId)
+      ? obserwowaneIds.filter(id => id !== koncertId)
+      : [...obserwowaneIds, koncertId];
+    setObserwowaneIds(next);
+    try {
+      await setDoc(doc(db, "users", uid), { obserwowaneIds: next }, { merge: true });
+    } catch (e) { console.error(e); setObserwowaneIds(obserwowaneIds); }
+  };
+
   const fetchAdminEmails = async () => {
     try {
       const snap = await getDoc(doc(db, "config", "admins"));
@@ -121,21 +148,50 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const unsubPromotors = onSnapshot(doc(db, "config", "promotors"), (snap) => {
+      if (snap.exists() && Array.isArray(snap.data()?.emails)) {
+        setPromotorEmails(snap.data().emails);
+      } else {
+        setPromotorEmails([]);
+      }
+    });
+    return () => unsubPromotors();
+  }, []);
+
+  const canAccessAdminPanel = user?.email && (adminEmails.includes(user.email) || promotorEmails.includes(user.email));
+  const isPromotorOnly = canAccessAdminPanel && !adminEmails.includes(user?.email);
+
+  useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setIsAdmin(u?.email && adminEmails.includes(u.email));
       if (u) {
         fetchZamowienia(u.email);
+        fetchObserwowane(u.uid);
         setShowAuth(false);
+      } else {
+        setObserwowaneIds([]);
       }
       setLoading(false);
     });
     return () => unsubscribeAuth();
-  }, [adminEmails]);
+  }, [adminEmails, promotorEmails]);
+
+  const deduplicateKoncerty = (lista) => {
+    const normalize = (artysta) => String(artysta || '').replace(/#\d+$/, '').trim().toLowerCase();
+    const seen = new Set();
+    return lista.filter(k => {
+      const key = normalize(k.artysta);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
 
   useEffect(() => {
     const unsubKoncerty = onSnapshot(collection(db, "koncerty"), (snapshot) => {
-      setKoncerty(snapshot.docs.map(d => ({ id_db: d.id, ...d.data() })));
+      const raw = snapshot.docs.map(d => ({ id_db: d.id, ...d.data() }));
+      setKoncerty(deduplicateKoncerty(raw));
     });
     fetchPlanySali();
     return () => unsubKoncerty();
@@ -273,6 +329,8 @@ export default function App() {
       <Header
         user={user}
         isAdmin={isAdmin}
+        isPromotorOnly={isPromotorOnly}
+        canAccessAdminPanel={canAccessAdminPanel}
         showProfile={showProfile}
         showAdminPanel={showAdminPanel}
         onLogin={() => setShowAuth(true)}
@@ -286,17 +344,26 @@ export default function App() {
       <div className="container">
         {showAuth && !user ? (
           <AuthView onClose={() => setShowAuth(false)} />
-        ) : showAdminPanel && isAdmin && user ? (
+        ) : showAdminPanel && canAccessAdminPanel && user ? (
           <AdminPanel 
             koncerty={koncerty} 
             refreshData={() => {}} 
             planySali={{ ...domyslnePlany, ...planySali }} 
             refreshPlany={fetchPlanySali}
             user={user}
+            isAdmin={isAdmin}
             onBackToSite={() => setShowAdminPanel(false)}
           />
         ) : showProfile && user ? (
-          <UserProfile user={user} historia={historiaZamowien} onClose={() => setShowProfile(false)} />
+          <UserProfile 
+            user={user} 
+            historia={historiaZamowien} 
+            onClose={() => setShowProfile(false)}
+            koncerty={koncerty}
+            obserwowaneIds={obserwowaneIds}
+            toggleObserwowane={toggleObserwowane}
+            onSelectConcert={(k) => { setShowProfile(false); handleSelectConcert(k); }}
+          />
         ) : aktualnyKoncertDoWidoku ? (
           <ReservationView 
             wybranyKoncert={aktualnyKoncertDoWidoku} 
@@ -311,13 +378,26 @@ export default function App() {
             wszystkieMiejsca={planySaliZDomyslnymi[aktualnyKoncertDoWidoku.planSali]?.miejsca || planySaliZDomyslnymi.arena?.miejsca}
             nazwaSali={planySaliZDomyslnymi[aktualnyKoncertDoWidoku.planSali]?.nazwa || planySaliZDomyslnymi.arena?.nazwa}
             timeLeft={timeLeft} 
-            odblokujMiejsca={odblokujMiejsca} 
+            odblokujMiejsca={odblokujMiejsca}
+            koncerty={koncerty}
+            obserwowaneIds={obserwowaneIds}
+            toggleObserwowane={toggleObserwowane}
           />
         ) : (
           <div className="fade-in" style={{width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
             
             {searchQuery === '' && selectedCategory === 'Wszystkie' && koncerty.length > 0 && (
-              <ConcertSlider koncerty={koncerty} onSelect={handleSelectConcert} />
+              <>
+                <ConcertSlider 
+                  koncerty={koncerty} 
+                  onSelect={handleSelectConcert}
+                  user={user}
+                  obserwowaneIds={obserwowaneIds}
+                  toggleObserwowane={toggleObserwowane}
+                  onRequireAuth={() => setShowAuth(true)}
+                />
+                <HotEvents koncerty={koncerty} onSelect={handleSelectConcert} />
+              </>
             )}
             
             <div className="search-box" style={{ width: '100%', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
@@ -330,7 +410,15 @@ export default function App() {
               </div>
             </div>
 
-            <ConcertList koncerty={currentConcerts} setWybranyKoncert={handleSelectConcert} setWybraneMiejsca={setWybraneMiejsca} />
+            <ConcertList 
+              koncerty={currentConcerts} 
+              setWybranyKoncert={handleSelectConcert} 
+              setWybraneMiejsca={setWybraneMiejsca}
+              user={user}
+              obserwowaneIds={obserwowaneIds}
+              toggleObserwowane={toggleObserwowane}
+              onRequireAuth={() => setShowAuth(true)}
+            />
             
             {totalPages > 1 && (
               <div style={{display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '50px', marginBottom: '40px'}}>

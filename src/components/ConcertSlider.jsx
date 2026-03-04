@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function ConcertSlider({ koncerty, onSelect }) {
+export default function ConcertSlider({ koncerty, onSelect, user, obserwowaneIds, toggleObserwowane }) {
   const [current, setCurrent] = useState(0);
 
   // LOGIKA: Najpierw szukamy tych specjalnie promowanych przez Admina.
@@ -35,6 +35,15 @@ export default function ConcertSlider({ koncerty, onSelect }) {
           className={`slide ${index === safeCurrent ? 'active' : ''}`}
           style={{ backgroundImage: `url(${k.image || 'https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&w=1200'})` }}
         >
+          {user && (
+            <button
+              className={`slide-observe-btn ${obserwowaneIds?.includes(k.id_db) ? 'active' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleObserwowane?.(k.id_db); }}
+              title={obserwowaneIds?.includes(k.id_db) ? 'Usuń z obserwowanych' : 'Dodaj do obserwowanych'}
+            >
+              {obserwowaneIds?.includes(k.id_db) ? '★' : '☆'}
+            </button>
+          )}
           <div className="slide-content">
             <span style={{ background: '#ef4444', color: '#fff', padding: '5px 12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '15px', display: 'inline-block' }}>
               🔥 Polecane Wydarzenie

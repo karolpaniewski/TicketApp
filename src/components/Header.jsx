@@ -1,4 +1,4 @@
-export default function Header({ user, isAdmin, showProfile, showAdminPanel, onLogin, onLogout, onToggleProfile, onToggleAdminPanel, onLogoClick }) {
+export default function Header({ user, isAdmin, isPromotorOnly, canAccessAdminPanel, showProfile, showAdminPanel, onLogin, onLogout, onToggleProfile, onToggleAdminPanel, onLogoClick }) {
   return (
     <header className="site-header">
       <div className="header-inner">
@@ -11,13 +11,14 @@ export default function Header({ user, isAdmin, showProfile, showAdminPanel, onL
           <a href="#" onClick={(e) => { e.preventDefault(); onLogoClick(); }}>Strona główna</a>
           <a href="#" onClick={(e) => { e.preventDefault(); onLogoClick(); }}>Wydarzenia</a>
           {isAdmin && user && <span className="header-badge">Admin</span>}
+          {isPromotorOnly && user && <span className="header-badge header-badge-promotor">Promotor</span>}
         </nav>
 
         <div className="header-auth">
           {user ? (
             <div className="header-user">
               <div className="header-avatar">
-                {isAdmin ? '⚙️' : user.email[0].toUpperCase()}
+                {(isAdmin || isPromotorOnly) ? '⚙️' : user.email[0].toUpperCase()}
               </div>
               <div className="header-user-info">
                 <span className="header-user-label">Zalogowano</span>
@@ -26,7 +27,7 @@ export default function Header({ user, isAdmin, showProfile, showAdminPanel, onL
               <button className="header-btn header-btn-secondary" onClick={onToggleProfile}>
                 {showProfile ? '← Wróć' : '👤 Profil'}
               </button>
-              {isAdmin && (
+              {canAccessAdminPanel && (
                 <button className="header-btn header-btn-secondary" onClick={onToggleAdminPanel} style={{ background: showAdminPanel ? 'var(--primary)' : undefined }}>
                   {showAdminPanel ? '← Strona' : '⚙️ Panel Admina'}
                 </button>
